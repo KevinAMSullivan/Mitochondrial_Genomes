@@ -153,7 +153,7 @@ $BWA_HOME/bwa index \
        		$RAW_READS_HOME/104488_S2_L001_R1_001.fastq	\
        		$RAW_READS_HOME/104488_S2_L001_R2_001.fastq	\
 	-t $THREADS	\
-	> $ABBREV"_aln-pe.sam" 	
+	> 104488_S2_aln-pe.sam 	
 		
 						
 echo $ABBREV"_R1&2_map" |  mailx -s $ABBREV"_R1&2_map" kev.am.sullivan@gmail.com	
@@ -166,54 +166,53 @@ echo $ABBREV"_R1&2_map" |  mailx -s $ABBREV"_R1&2_map" kev.am.sullivan@gmail.com
 #	> $ABBREV"_aln-se.sam" 	
 
 #echo $ABBREV"_RX_map" |  mailx -s $ABBREV"_RX_map" kev.am.sullivan@gmail.com	
-		
-		
+	
 #===================
 # [2] calculate the max insertion size
 #	maxInsSize=insSize*2  
 	
 #===================
 # [3] use sampe and SAMtools to create bam files of the mapped reads
-create sam file from paired mapped reads
-string	$BWA_HOME/bwa sampe 				\
-	-f $ABBREV"_SAMPE.sam" 	\
-string		$REF_HOME/$REFGENOME 				\
-string		$ABBREV"_aln-pe.sam" 		\
-string		$PROCESSED_READS_HOME/$RP1 			\
-string		$PROCESSED_READS_HOME/$RP2			
+#create sam file from paired mapped reads
+	$BWA_HOME/bwa sampe 				\
+	#-f $ABBREV"_SAMPE.sam" 	\
+		$REF_HOME/$REFGENOME 				\
+		104488_S2_aln-pe.sam 		\
+		104488_S2_L001_R1_001.fastq			\
+		104488_S2_L001_R2_001.fastq			
 		
 #create sam file from unpaired mapped reads
 #string	$BWA_HOME/bwa samse 				\
-string		$REF_HOME/$REFGENOME 	\
-string		$ABBREV"_RX.sai" 		\
-string		$PROCESSED_READS_HOME/$ABBREV"_RX_cat.fastq"	\
-		>$ABBREV"_RX_SAMSE.sam"	\
+#string		$REF_HOME/$REFGENOME 	\
+#string		$ABBREV"_RX.sai" 		\
+#string		$PROCESSED_READS_HOME/$ABBREV"_RX_cat.fastq"	\
+#		>$ABBREV"_RX_SAMSE.sam"	\
 
 #convert paired sam file to bam
 	$SAMTOOLS_HOME/samtools view 			\
 		-Sb 					\
-		-o $ABBREV"_aln-pe.bam" 	\
-		$ABBREV"_aln-pe.sam"		
+		-o 104488_S2_aln-pe.bam 	\
+		104488_S2_aln-pe.sam 		
 
 #convert unpaired sam file to bam
 	#$SAMTOOLS_HOME/samtools view 			\
-		-Sb 					\
-		-o $ABBREV"_aln-se.bam" 	\
-		$ABBREV"_aln-se.sam" 		
+		#-Sb 					\
+		#-o $ABBREV"_aln-se.bam" 	\
+		#$ABBREV"_aln-se.sam" 		
 
 #merge the paired and unpaired mapped reads to a single bam file
-	$SAMTOOLS_HOME/samtools merge	\
-		$ABBREV"_merge.bam" \
-		$ABBREV"_aln-pe.bam"	\
-		$ABBREV"_aln-se.bam"	
+	#$SAMTOOLS_HOME/samtools merge	\
+		#$ABBREV"_merge.bam" \
+		#$ABBREV"_aln-pe.bam"	\
+		#$ABBREV"_aln-se.bam"	
 
 #Not sure what this does - sort bam file?
 	$SAMTOOLS_HOME/samtools view 			\
-		-F 4 					\
+#		-F 4 					\
 		-q 20 					\
 		-b						\
-		-o $ABBREV"_R3.bam" 	\
-		$ABBREV"_merge.bam" 
+		-o 104488_S2_R3.bam 	\
+		104488_S2_aln-pe.bam  
 
 #### for samtools v1.19		
 ##---	$SAMTOOLS_HOME/samtools sort 			\
@@ -223,11 +222,11 @@ string		$PROCESSED_READS_HOME/$ABBREV"_RX_cat.fastq"	\
 
 #### for samtools v1.2		
 	$SAMTOOLS_HOME/samtools sort 			\
-		-o $ABBREV"_R3_sorted.bam"	\
+		-o 104488_S2_R3_sorted.bam	\
 		-O bam	\
-		-T $ABBREV"_R3_sorted" \
+		-T 104488_S2_sorted \
 		-@ $THREADS 					\
-		$ABBREV"_R3.bam" 		
+		104488_S2_aln-pe.bam 		
 
 echo $ABBREV"_RX_sort" |  mailx -s $ABBREV"_RX_sort" kev.am.sullivan@gmail.com	
 		
@@ -237,9 +236,9 @@ echo $ABBREV"_RX_sort" |  mailx -s $ABBREV"_RX_sort" kev.am.sullivan@gmail.com
         -Xmx24g 				\
 		-Djava.io.tmpdir=tmp 			\
 		-jar $PICARD_HOME/MarkDuplicates.jar 	\
-        	I=$ABBREV"_R3_sorted.bam" 	\
-       		O=$ABBREV"_R3_noDup.bam" 	\
-        	M=$ABBREV"_R3_dupMetric.out" 	\
+        	I=104488_S2_R3_sorted.bam 	\
+       		O=104488_S2_R3_noDup.bam	\
+        	M=104488_S2_R3_dupMetric.out 	\
         	REMOVE_DUPLICATES=true 			\
 		MAX_FILE_HANDLES_FOR_READ_ENDS_MAP=100 	\
 		VALIDATION_STRINGENCY=SILENT 		\
@@ -252,35 +251,38 @@ echo $ABBREV"_RX_sort" |  mailx -s $ABBREV"_RX_sort" kev.am.sullivan@gmail.com
 $SAMTOOLS1_8_HOME/samtools mpileup \
 	-C50 \
 	-f $REF_HOME/$REFGENOME \
-	$ABBREV"_R3_noDup.bam" \
-	>$ABBREV"_mPileUp_0_1_18.vcf"
+	104488_S2_R3_noDup.bam \
+	>104488_S2_mPileUp_0_1_18.vcf
 	
---echo $ABBREV"_pileup_finished" |  mailx -s $ABBREV"_pileup_finished" kev.am.sullivan@gmail.com
+--echo 104488_S2_pileup_finished |  mailx -s $ABBREV"_pileup_finished" kev.am.sullivan@gmail.com
 
 	
 #=======================	
 #[6] generate fasta consensus from pileup
 
 perl $RAY_SOFTWARE/pileup2fasta_v1-4.pl \
-	-i $ABBREV"_mPileUp_0_1_18.vcf" \
-	-o $ABBREV"_masked.fa"	\
-	-g $ABBREV"_masked.gff"	\
+	-i 104488_S2_mPileUp_0_1_18.vcf \
+	-o 104488_S2__masked.fa	\
+	-g 104488_S2__masked.gff	\
 	-b 8	\
 	-s		\
 	-V		
 
-	
+$SAMTOOLS_HOME/samtools index \
+	-b \
+	104488_S2_R3_noDup.bam 	
+
 $BEDTOOLS_HOME/bedtools genomecov \
-	-ibam $ABBREV"_R3_noDup.bam" \
-	-g $ABBREV"_masked.fa" \
-	| grep genome >$ABBREV"_genome_cov.txt" 
+	-ibam 104488_S2_R3_noDup.bam \
+	-g 104488_S2__masked.fa \
+	| grep genome >104488_S2_genome_cov.txt 
 
 
-echo $ABBREV"_fasta_finished" |  mailx -s $ABBREV"_fasta_finished" kev.am.sullivan@gmail.com
+echo 104488_S2_fasta_finished" |  mailx -s $ABBREV"_fasta_finished" kev.am.sullivan@gmail.com
 
 
 	
-echo $ABBREV"_assembly_finished" |  mailx -s $ABBREV"_assembly_finished" kev.am.sullivan@gmail.com
+echo 104488_S2_assembly_finished" |  mailx -s $ABBREV"_assembly_finished" kev.am.sullivan@gmail.com
 
 done
 sleep 5
