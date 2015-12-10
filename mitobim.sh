@@ -5,7 +5,7 @@
 #$ -N mitobim
 #$ -o $JOB_NAME.o$JOB_ID
 #$ -e $JOB_NAME.e$JOB_ID
-#$ -q R2D2,Chewie
+#$ -q Yoda
 #$ -pe fill 1
 #$ -P communitycluster
 
@@ -56,7 +56,7 @@ cd $WORKDIR/$SAMPLE_ID
 #======================
 #MIRA4 assembly 
 #Create manifest.config for MIRA
-echo -e "\n#manifest file for basic mapping assembly with illumina data using MIRA 4\n\nproject = initial-mapping-of-"$SAMPLE_ID"-to-Pmega-mt\n\njob=genome,mapping,accurate\n\nparameters = -NW:mrnl=0 -AS:nop=1 SOLEXA_SETTINGS -CO:msr=no\n\nreadgroup\nis_reference\ndata = $REF_HOME/$REFGENOME\nstrain = Pmega-mt-genome\n\n\nreadgroup = reads\ndefault_qual = 30\ndata = "$RAW_READS_HOME/$SAMPLE_ID".fastq.unassembled.reverse.fastq" $RAW_READS_HOME/$SAMPLE_ID".fastq.unassembled.forward.fastq" $RAW_READS_HOME/$SAMPLE_ID".fastq.assembled.fastq\ntechnology = solexa\nstrain = "$SAMPLE_ID"\n" > $SUPPORT_FILES/$SAMPLE_ID"_manifest.conf"
+echo -e "\n#manifest file for basic mapping assembly with illumina data using MIRA 4\n\nproject = initial-mapping-of-"$SAMPLE_ID"-to-Pmega-mt\n\njob=genome,mapping,accurate\n\nparameters = -NW:mrnl=0 -AS:nop=1 SOLEXA_SETTINGS -CO:msr=no\n\nreadgroup\nis_reference\ndata = $REF_HOME/$REFGENOME\nstrain = Pmega-mt-genome\n\n\nreadgroup = reads\ndata = "$RAW_READS_HOME/$SAMPLE_ID".fastq.unassembled.reverse.fastq" $RAW_READS_HOME/$SAMPLE_ID".fastq.unassembled.forward.fastq" $RAW_READS_HOME/$SAMPLE_ID".fastq.assembled.fastq\ntechnology = solexa\nstrain = "$SAMPLE_ID"\n" > $SUPPORT_FILES/$SAMPLE_ID"_manifest.conf"
 
 #Run MIRA
 $MIRA_HOME/bin/mira $SUPPORT_FILES/$SAMPLE_ID"_manifest.conf"
@@ -69,8 +69,8 @@ perl $RAY_SOFTWARE/MITObim_1.8.pl \
 	-end 10 \
 	-sample $SAMPLE_ID \
 	-ref Pmega-mt-genome \
-	-readpool /lustre/work/kevsulli/work/Sequences/MitoBim/$RAW_READS_HOME/$SAMPLE_ID".fastq.unassembled.reverse.fastq" $RAW_READS_HOME/$SAMPLE_ID".fastq.unassembled.forward.fastq" $RAW_READS_HOME/$SAMPLE_ID".fastq.assembled.fastq" \
-	-maf $WORKDIR/$SAMPLE_ID/$SAMPLE_ID_manifest.conf \
+	-readpool /lustre/work/kevsulli/work/Sequences/MitoBim/Pear/$SAMPLE_ID".fastq.unassembled.reverse.fastq" $RAW_READS_HOME/$SAMPLE_ID".fastq.unassembled.forward.fastq" $RAW_READS_HOME/$SAMPLE_ID".fastq.assembled.fastq" \
+	-maf $WORKDIR/$SAMPLE_ID/"initial-mapping-of-"$SAMPLE_ID"-to-Pmega-mt_assembly"/"initial-mapping-of-"$SAMPLE_ID"-to-Pmega-mt_d_results"/"initial-mapping-of-"$SAMPLE_ID"-to-Pmega-mt_out.maf" \
 	&> $SAMPLE_ID".log"
 
 cd ..
