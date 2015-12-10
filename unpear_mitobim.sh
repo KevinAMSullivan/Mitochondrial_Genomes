@@ -2,19 +2,14 @@
 #$ -V
 #$ -cwd
 #$ -S /bin/bash
-#$ -N mitobim
+#$ -N unpear-mitobim
 #$ -o $JOB_NAME.o$JOB_ID
 #$ -e $JOB_NAME.e$JOB_ID
-#$ -q R2D2,Chewie
+#$ -q R2D2
 #$ -pe fill 1
 #$ -P communitycluster
 
 #This file will process raw Illumina data using Trimmomatic.  This will be followed by mapping to a reference mitochondrial genome using MIRA4 to create a new mitochondrial genome assembly.
-
-dox2unix unpear_mitobim.sh
-
-cd /lustre/work/kevsulli/work/Sequences/MitoBim
-mkdir UnPear 
 
 BASEDIR=/lustre/work/kevsulli/work/Sequences/MitoBim/UnPear
 WORKDIR=$BASEDIR/output
@@ -61,7 +56,7 @@ cd $WORKDIR/$SAMPLE_ID
 #======================
 #MIRA4 assembly 
 #Create manifest.config for MIRA
-echo -e "\n#manifest file for basic mapping assembly with illumina data using MIRA 4\n\nproject = initial-mapping-of-"$SAMPLE_ID"-to-UnPear-mt\n\njob=genome,mapping,accurate\n\nparameters = -NW:mrnl=0 -AS:nop=1 SOLEXA_SETTINGS -CO:msr=no\n\nreadgroup\nis_reference\ndata = $REF_HOME/$REFGENOME\nstrain = UnPear-mt-genome\n\nreadgroup = reads\ndata = "$RAW_READS_HOME/$SAMPLE_ID"_1_filterPaired.fq" $RAW_READS_HOME/$SAMPLE_ID"_2_filterPaired.fq" $RAW_READS_HOME/$SAMPLE_ID"_1_filterUnPaired.fq" $RAW_READS_HOME/$SAMPLE_ID"_2_filterUnPaired.fq\ntechnology = solexa\nstrain = "$SAMPLE_ID"\n" > $SUPPORT_FILES/$SAMPLE_ID"_manifest.conf"
+echo -e "\n#manifest file for basic mapping assembly with illumina data using MIRA 4\n\nproject = initial-mapping-of-"$SAMPLE_ID"-to-Pmega-mt\n\njob=genome,mapping,accurate\n\nparameters = -NW:mrnl=0 -AS:nop=1 SOLEXA_SETTINGS -CO:msr=no\n\nreadgroup\nis_reference\ndata = $REF_HOME/$REFGENOME\nstrain = Pmega-mt-genome\n\nreadgroup = reads\ndefault_qual = 30\ndata = "$RAW_READS_HOME/$SAMPLE_ID"_1_filterPaired.fq" $RAW_READS_HOME/$SAMPLE_ID"_2_filterPaired.fq" $RAW_READS_HOME/$SAMPLE_ID"_1_filterUnPaired.fq" $RAW_READS_HOME/$SAMPLE_ID"_2_filterUnPaired.fq\ntechnology = solexa\nstrain = "$SAMPLE_ID"\n" > $SUPPORT_FILES/$SAMPLE_ID"_manifest.conf"
 
 #Run MIRA
 $MIRA_HOME/bin/mira $SUPPORT_FILES/$SAMPLE_ID"_manifest.conf"
@@ -73,9 +68,9 @@ perl $RAY_SOFTWARE/MITObim_1.8.pl \
 	-start 1 \
 	-end 10 \
 	-sample $SAMPLE_ID \
-	-ref UnPear-mt-genome \
-	-readpool $UNZIPPED_RAW_HOME/$SAMPLE_ID"_reverse.fastq" $UNZIPPED_RAW_HOME/$SAMPLE_ID"_forward.fastq" \
-	-maf $WORKDIR/$SAMPLE_ID/"initial-mapping-of-"$SAMPLE_ID"-to-UnPear-mt_assembly"/"initial-mapping-of-"$SAMPLE_ID"-to-UnPear-mt_d_results"/"initial-mapping-of-"$SAMPLE_ID"-to-UnPear-mt_out.maf" \
+	-ref Pmega-mt-genome \
+	-readpool /lustre/work/kevsulli/work/Sequences/MitoBim/Trim1/$SAMPLE_ID"_1_filterPaired.fq" $RAW_READS_HOME/$SAMPLE_ID"_2_filterPaired.fq" $RAW_READS_HOME/$SAMPLE_ID"_1_filterUnPaired.fq" $RAW_READS_HOME/$SAMPLE_ID"_2_filterUnPaired.fq" \
+	-maf $WORKDIR/$SAMPLE_ID/"initial-mapping-of-"$SAMPLE_ID"-to-Pmega-mt_assembly"/"initial-mapping-of-"$SAMPLE_ID"-to-Pmega-mt_d_results"/"initial-mapping-of-"$SAMPLE_ID"-to-Pmega-mt_out.maf" \
 	&> $SAMPLE_ID".log"
 
 cd ..
